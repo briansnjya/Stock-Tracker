@@ -15,9 +15,17 @@ function App() {
   const fetchStock = async (selectedTicker) => {
     setLoading(true)
     try {
-      const res = await axios.get(`http://localhost:8000/api/stock/${selectedTicker}`)
-      setStockData(res.data.data)
-      setStats(res.data.stats)
+      // 1. Ubah URL ke Space Hugging Face dan gunakan method POST
+      const res = await axios.post('https://briansnjya-api-stocktracker.hf.space/gradio_api/run/stock', {
+        // 2. Gradio mewajibkan input parameter dikirim dalam array bernama 'data'
+        data: [selectedTicker]
+      })
+      
+      // 3. Gradio secara otomatis membungkus hasil return Python di dalam array indeks ke-0
+      const result = res.data.data[0]
+      
+      setStockData(result.data)
+      setStats(result.stats)
       setTicker(selectedTicker)
     } catch (error) {
       console.error("Gagal mengambil data saham", error)
