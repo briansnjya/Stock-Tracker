@@ -15,7 +15,7 @@ function App() {
   const fetchStock = async (selectedTicker) => {
     setLoading(true)
     try {
-      const res = await axios.post('https://briansnjya-api-stocktracker.hf.space/gradio_api/run/stock', {
+      const res = await axios.post('https://briansnjya-api-stocktracker.hf.space/gradio_api/call/stock', {
         data: [selectedTicker]
       })
       
