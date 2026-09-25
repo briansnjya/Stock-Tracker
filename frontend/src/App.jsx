@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { Client } from "@gradio/client"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import './App.css'
 
@@ -15,23 +15,21 @@ function App() {
   const fetchStock = async (selectedTicker) => {
     setLoading(true)
     try {
-      const res = await axios.post('https://briansnjya-api-stocktracker.hf.space/gradio_api/call/stock', {
-        data: [selectedTicker]
-      })
+      // 2. Hubungkan secara spesifik ke nama Space Hugging Face kamu
+      const client = await Client.connect("briansnjya/api-stocktracker");
       
-      // Tambahkan log ini agar kita bisa melihat isi asli dari Hugging Face
-      console.log("Raw Response dari Hugging Face:", res.data);
-
-      // Pastikan struktur datanya. Kadang Gradio tidak membungkusnya di dalam index [0] jika API sederhana.
-      // Jika res.data.data adalah array, baru kita ambil index 0.
-      const result = Array.isArray(res.data.data) ? res.data.data[0] : res.data.data;
+      // 3. Panggil API dengan nama endpoint "stock" dan kirim argumen dalam bentuk array
+      const result = await client.predict("stock", [selectedTicker]);
       
-      if (result && result.data && result.stats) {
-          setStockData(result.data)
-          setStats(result.stats)
-          setTicker(selectedTicker)
+      // 4. Gradio client akan otomatis menunggu antrean selesai dan mengekstrak hasilnya
+      const actualData = result.data[0];
+      
+      if (actualData && actualData.data && actualData.stats) {
+        setStockData(actualData.data);
+        setStats(actualData.stats);
+        setTicker(selectedTicker);
       } else {
-          console.error("Struktur JSON tidak sesuai:", result);
+        console.error("Struktur JSON gagal diekstrak:", actualData);
       }
       
     } catch (error) {
